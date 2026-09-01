@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crack Spread Econometric Analysis</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-primary: #0a0e17;
+    --bg-card: #111827;
+    --bg-card-alt: #1a2235;
+    --accent: #3b82f6;
+    --accent-light: #60a5fa;
+    --accent-glow: rgba(59, 130, 246, 0.15);
+    --green: #10b981;
+    --red: #ef4444;
+    --amber: #f59e0b;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --border: rgba(255,255,255,0.06);
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  /* Slide container */
+  .slides-wrapper {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+  }
+
+  .slide {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 80px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    transform: translateX(40px);
+  }
+
+  .slide.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+  }
+
+  .slide.exit {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+
+  /* Typography */
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+  }
+
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 600;
+    margin-bottom: 32px;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--accent-light);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 12px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  p, li {
+    font-size: 1.15rem;
+    line-height: 1.7;
+    color: var(--text-secondary);
+  }
+
+  ul { list-style: none; padding: 0; }
+
+  ul li {
+    padding: 8px 0;
+    padding-left: 24px;
+    position: relative;
+  }
+
+  ul li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 17px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .highlight { color: var(--accent-light); font-weight: 600; }
+  .green { color: var(--green); }
+  .red { color: var(--red); }
+  .amber { color: var(--amber); }
+
+  /* Title slide */
+  .slide-title {
+    text-align: center;
+    background: radial-gradient(ellipse at 50% 30%, rgba(59,130,246,0.08) 0%, transparent 70%);
+  }
+
+  .slide-title h1 {
+    font-size: 2.8rem;
+    max-width: 900px;
+    background: linear-gradient(135deg, #f1f5f9 0%, #94a3b8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .slide-title .subtitle {
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    margin-top: 8px;
+    font-weight: 300;
+  }
+
+  .slide-title .meta {
+    margin-top: 40px;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.8;
+  }
+
+  .divider {
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-light));
+    border-radius: 2px;
+    margin: 20px auto;
+  }
+
+  /* Two-column layout */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    width: 100%;
+    max-width: 1200px;
+    align-items: center;
+  }
+
+  .two-col-wide {
+    grid-template-columns: 1.2fr 0.8fr;
+  }
+
+  .two-col-narrow {
+    grid-template-columns: 0.8fr 1.2fr;
+  }
+
+  /* Content card */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+  }
+
+  /* Figure styling */
+  .figure-container {
+    background: #fff;
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+
+  .figure-container img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    display: block;
+  }
+
+  .figure-container.dark {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+  }
+
+  .figure-full {
+    max-width: 900px;
+    width: 100%;
+  }
+
+  .figure-wide {
+    max-width: 1100px;
+    width: 100%;
+  }
+
+  /* Equation box */
+  .equation {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 32px;
+    font-size: 1.15rem;
+    color: var(--text-primary);
+    text-align: center;
+    font-family: 'Georgia', serif;
+    font-style: italic;
+    margin: 16px 0;
+  }
+
+  /* Table */
+  .table-container {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1rem;
+  }
+
+  thead th {
+    background: var(--accent);
+    color: white;
+    padding: 14px 20px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  thead th:first-child { border-radius: 10px 0 0 0; }
+  thead th:last-child { border-radius: 0 10px 0 0; }
+
+  tbody td {
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-secondary);
+  }
+
+  tbody tr:hover { background: var(--accent-glow); }
+
+  .sig { color: var(--green); font-weight: 700; }
+  .not-sig { color: var(--text-muted); }
+
+  /* Pipeline / steps */
+  .pipeline {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 24px 0;
+  }
+
+  .pipeline-step {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 24px;
+    text-align: center;
+    min-width: 140px;
+  }
+
+  .pipeline-step .step-num {
+    font-size: 0.75rem;
+    color: var(--accent);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+  }
+
+  .pipeline-step .step-label {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .pipeline-arrow {
+    color: var(--text-muted);
+    font-size: 1.5rem;
+  }
+
+  /* Key finding box */
+  .finding-box {
+    background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(16,185,129,0.06));
+    border: 1px solid rgba(59,130,246,0.2);
+    border-radius: 16px;
+    padding: 28px 36px;
+    margin: 16px 0;
+    max-width: 900px;
+    width: 100%;
+  }
+
+  .finding-box p {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+  }
+
+  /* Stat grid */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin: 20px 0;
+    width: 100%;
+    max-width: 800px;
+  }
+
+  .stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .stat-card .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent-light);
+    font-family: 'Playfair Display', serif;
+  }
+
+  .stat-card .stat-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  /* Causal chain */
+  .causal-chain {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 24px 0;
+    flex-wrap: wrap;
+  }
+
+  .causal-node {
+    background: var(--bg-card);
+    border: 2px solid var(--accent);
+    border-radius: 12px;
+    padding: 14px 28px;
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: var(--text-primary);
+  }
+
+  .causal-node.primary {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+
+  .causal-arrow {
+    font-size: 1.8rem;
+    color: var(--accent-light);
+  }
+
+  .causal-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: -6px;
+  }
+
+  .causal-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* Navigation */
+  .nav-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 40px;
+    z-index: 100;
+    background: linear-gradient(transparent, rgba(10,14,23,0.9));
+  }
+
+  .nav-bar .progress {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .progress-bar-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: rgba(255,255,255,0.05);
+    z-index: 100;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-light));
+    transition: width 0.4s ease;
+  }
+
+  .nav-buttons {
+    display: flex;
+    gap: 8px;
+  }
+
+  .nav-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    transition: all 0.2s;
+  }
+
+  .nav-btn:hover {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+
+  /* Slide-specific content alignment */
+  .content-left {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .content-center {
+    align-items: center;
+    text-align: center;
+  }
+
+  .full-width { width: 100%; max-width: 1200px; }
+
+  /* Conclusion list */
+  .conclusion-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    max-width: 1000px;
+    width: 100%;
+  }
+
+  .conclusion-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px 28px;
+  }
+
+  .conclusion-item h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--accent-light);
+    margin-bottom: 8px;
+  }
+
+  .conclusion-item p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  /* End slide */
+  .slide-end {
+    text-align: center;
+    background: radial-gradient(ellipse at 50% 50%, rgba(59,130,246,0.06) 0%, transparent 70%);
+  }
+
+  .slide-end h1 {
+    font-size: 3.5rem;
+    background: linear-gradient(135deg, var(--accent-light), var(--green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Keyboard hint */
+  .key-hint {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    opacity: 0.5;
+  }
+
+  kbd {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar-container">
+  <div class="progress-bar" id="progressBar"></div>
+</div>
+
+<div class="slides-wrapper" id="slidesWrapper">
+
+  <!-- SLIDE 1: Title -->
+  <div class="slide slide-title active" data-slide="0">
+    <h3>Econometric Analysis</h3>
+    <h1>The 3-2-1 Crack Spread:<br>Lead-Lag Dynamics in Energy Prices</h1>
+    <div class="divider"></div>
+    <p class="subtitle">Investigating Price Transmission between Crude Oil and Refined Products</p>
+    <div class="meta">
+      Econometrics of Energy Markets<br>
+      Master's coursework, January 2026
+    </div>
+  </div>
+
+  <!-- SLIDE 2: Research Question -->
+  <div class="slide content-center" data-slide="1">
+    <h3>Motivation</h3>
+    <h2>What Drives What?</h2>
+    <div class="full-width" style="max-width: 850px;">
+      <p style="font-size: 1.25rem; color: var(--text-primary); text-align: center; margin-bottom: 32px;">
+        Does crude oil push product prices up <span class="highlight">(cost-push)</span>, or does downstream demand for gasoline pull crude prices higher <span class="highlight">(demand-pull)</span>?
+      </p>
+      <div style="display: flex; gap: 24px; justify-content: center; margin-bottom: 32px;">
+        <div class="card" style="flex:1; text-align:center;">
+          <h4 style="color: var(--red); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">Cost-Push Hypothesis</h4>
+          <p style="font-size: 0.95rem;">Crude oil price shocks flow <em>downstream</em> to gasoline and heating oil</p>
+        </div>
+        <div class="card" style="flex:1; text-align:center;">
+          <h4 style="color: var(--green); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">Demand-Pull Hypothesis</h4>
+          <p style="font-size: 0.95rem;">Refined product demand signals flow <em>upstream</em> to crude oil pricing</p>
+        </div>
+      </div>
+      <div class="finding-box" style="text-align: center;">
+        <p style="font-size: 1rem;">Post-2020, structural shifts in US refining capacity and record-high crack spreads make this question more relevant than ever.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: The 3-2-1 Crack Spread -->
+  <div class="slide content-center" data-slide="2">
+    <h3>Background</h3>
+    <h2>The 3-2-1 Crack Spread</h2>
+    <p style="max-width: 800px; text-align: center; margin-bottom: 28px;">
+      The theoretical gross refining margin from processing <span class="highlight">3 barrels of crude</span> into <span class="highlight">2 barrels of gasoline</span> and <span class="highlight">1 barrel of distillate</span>.
+    </p>
+    <div class="equation">
+      S<sub>t</sub> = ( 2 &times; P<sub>Gas,t</sub> + 1 &times; P<sub>Heat,t</sub> &minus; 3 &times; P<sub>Crude,t</sub> ) &frasl; 3
+    </div>
+    <div class="stat-grid" style="margin-top: 28px;">
+      <div class="stat-card">
+        <div class="stat-value">WTI</div>
+        <div class="stat-label">Crude Oil Input</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">RBOB</div>
+        <div class="stat-label">Gasoline Output</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">NYH</div>
+        <div class="stat-label">Heating Oil Output</div>
+      </div>
+    </div>
+    <p style="margin-top: 16px; font-size: 0.95rem; color: var(--text-muted);">
+      NYMEX futures, PADD 3 (Gulf Coast), the world's most influential refining hub
+    </p>
+  </div>
+
+  <!-- SLIDE 4: Data Overview -->
+  <div class="slide content-center" data-slide="3">
+    <h3>Data</h3>
+    <h2>Price Series Overview</h2>
+    <div class="figure-container figure-wide">
+      <img src="figures/fig1_price_overview.png" alt="Price overview">
+    </div>
+    <p style="margin-top: 16px; font-size: 0.95rem; max-width: 800px; text-align: center;">
+      Weekly spot prices (Jan 2000 – Jan 2026) from FRED & EIA. Log-transformed for elasticity interpretation. <span class="highlight">N = 1,361 observations</span> spanning the 2008 crisis, 2014 oil glut, COVID-19, and the Ukraine conflict.
+    </p>
+  </div>
+
+  <!-- SLIDE 5: Methodology Pipeline -->
+  <div class="slide content-center" data-slide="4">
+    <h3>Methodology</h3>
+    <h2>Econometric Framework</h2>
+    <div class="pipeline">
+      <div class="pipeline-step">
+        <div class="step-num">Step 1</div>
+        <div class="step-label">Unit Root Tests</div>
+        <p style="font-size: 0.8rem; margin-top: 4px;">ADF + KPSS</p>
+      </div>
+      <div class="pipeline-arrow">&rarr;</div>
+      <div class="pipeline-step">
+        <div class="step-num">Step 2</div>
+        <div class="step-label">Cointegration</div>
+        <p style="font-size: 0.8rem; margin-top: 4px;">Johansen Test</p>
+      </div>
+      <div class="pipeline-arrow">&rarr;</div>
+      <div class="pipeline-step">
+        <div class="step-num">Step 3</div>
+        <div class="step-label">VECM</div>
+        <p style="font-size: 0.8rem; margin-top: 4px;">Error Correction</p>
+      </div>
+      <div class="pipeline-arrow">&rarr;</div>
+      <div class="pipeline-step">
+        <div class="step-num">Step 4</div>
+        <div class="step-label">Causality</div>
+        <p style="font-size: 0.8rem; margin-top: 4px;">Granger Tests</p>
+      </div>
+    </div>
+    <div class="card full-width" style="max-width: 900px; margin-top: 24px;">
+      <p style="margin-bottom: 12px;"><span class="highlight">Why VECM?</span> Standard regression is insufficient when variables share a long-run equilibrium. The VECM separates short-run shocks from long-run adjustment.</p>
+      <div class="equation" style="margin-top: 12px;">
+        &Delta;y<sub>t</sub> = v + &delta;t + &alpha;(&beta;'Y<sub>t-1</sub> + &epsilon; + &tau;t) + &Theta;<sub>1</sub>&Delta;y<sub>t-1</sub> + &Theta;<sub>2</sub>&Delta;y<sub>t-2</sub> + &mu;<sub>t</sub>
+      </div>
+      <p style="font-size: 0.9rem; text-align: center; margin-top: 8px;">
+        <span class="highlight">&alpha;</span> = speed of adjustment &nbsp;|&nbsp; <span class="highlight">&beta;</span> = cointegrating vectors &nbsp;|&nbsp; <span class="highlight">&Theta;</span> = short-run dynamics
+      </p>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: Cointegration Results -->
+  <div class="slide content-center" data-slide="5">
+    <h3>Results</h3>
+    <h2>Cointegration: Long-Run Equilibrium</h2>
+    <div class="two-col" style="max-width: 1100px;">
+      <div>
+        <p style="margin-bottom: 16px;">All three series are <span class="highlight">I(1)</span>: non-stationary in levels, stationary in first differences. The Johansen test finds <span class="highlight">rank r = 2</span>:</p>
+        <div class="stat-grid" style="grid-template-columns: 1fr 1fr; max-width: 400px;">
+          <div class="stat-card">
+            <div class="stat-value" style="font-size: 1.5rem;">107.15</div>
+            <div class="stat-label">Trace Statistic</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" style="font-size: 1.5rem;">74.63</div>
+            <div class="stat-label">Max Eigenvalue</div>
+          </div>
+        </div>
+        <p style="margin-top: 16px; font-size: 0.95rem;">Both exceed <span class="highlight">1% critical values</span>, confirming two distinct long-run equilibria consistent with the refining structure.</p>
+      </div>
+      <div class="card">
+        <h4 style="color: var(--accent-light); margin-bottom: 16px; font-size: 0.9rem;">Cointegrating Vectors</h4>
+        <div class="equation" style="font-size: 1rem; margin-bottom: 12px;">
+          ECT<sub>1</sub>: ln(Crude) &minus; 0.919 ln(Heat) = 0
+        </div>
+        <p style="font-size: 0.9rem; margin-bottom: 16px; text-align: center;">Crude-to-heating oil margin (~0.92 elasticity)</p>
+        <div class="equation" style="font-size: 1rem; margin-bottom: 12px;">
+          ECT<sub>2</sub>: ln(Gas) &minus; 0.910 ln(Heat) = 0
+        </div>
+        <p style="font-size: 0.9rem; text-align: center;">Gasoline-to-heating oil margin (~0.91 elasticity)</p>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 16px; text-align: center;">Near-unitary elasticities reflect the physical cost-of-production linkage</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: Error Correction -->
+  <div class="slide content-center" data-slide="6">
+    <h3>Results</h3>
+    <h2>Who Bears the Adjustment Burden?</h2>
+    <div class="two-col two-col-wide" style="max-width: 1200px;">
+      <div class="figure-container" style="padding: 16px;">
+        <img src="figures/fig2_vecm_results.png" alt="VECM results" style="min-height: 280px;">
+      </div>
+      <div>
+        <div class="finding-box" style="margin-bottom: 20px;">
+          <p><span class="highlight">Crude oil</span> is the only variable that significantly adjusts to the first error correction term (&alpha;<sub>1</sub> = &minus;0.042).</p>
+        </div>
+        <ul>
+          <li>Crude adjusts; gasoline and heating oil <em>don't</em>. Products lead, crude follows</li>
+          <li>Half-life of deviation: <span class="highlight">~16 weeks</span>, consistent with refinery procurement cycles</li>
+          <li>This challenges the conventional cost-push narrative</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 8: Granger Causality -->
+  <div class="slide content-center" data-slide="7">
+    <h3>Results</h3>
+    <h2>Granger Causality: The Pricing Cascade</h2>
+    <div class="full-width" style="max-width: 900px;">
+      <div class="table-container card" style="margin-bottom: 28px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Direction</th>
+              <th>F-stat</th>
+              <th>adj. p</th>
+              <th>Significance</th>
+              <th>Implication</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Crude &rarr; Gasoline</td>
+              <td>1.94</td>
+              <td>0.612</td>
+              <td class="not-sig">&mdash;</td>
+              <td class="not-sig">None</td>
+            </tr>
+            <tr>
+              <td>Gasoline &rarr; Crude</td>
+              <td>8.72</td>
+              <td>&lt; 0.001</td>
+              <td class="sig">***</td>
+              <td style="color: var(--green); font-weight: 600;">Demand-Pull</td>
+            </tr>
+            <tr>
+              <td>Crude &rarr; Heating Oil</td>
+              <td>5.45</td>
+              <td>0.001</td>
+              <td class="sig">***</td>
+              <td style="color: var(--red); font-weight: 600;">Cost-Push</td>
+            </tr>
+            <tr>
+              <td>Heating Oil &rarr; Crude</td>
+              <td>2.59</td>
+              <td>0.210</td>
+              <td class="not-sig">&mdash;</td>
+              <td class="not-sig">None</td>
+            </tr>
+            <tr>
+              <td>Gasoline &rarr; Heating Oil</td>
+              <td>8.24</td>
+              <td>&lt; 0.001</td>
+              <td class="sig">***</td>
+              <td style="color: var(--green); font-weight: 600;">Demand-Pull</td>
+            </tr>
+            <tr>
+              <td>Heating Oil &rarr; Gasoline</td>
+              <td>0.64</td>
+              <td>1.000</td>
+              <td class="not-sig">&mdash;</td>
+              <td class="not-sig">None</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size: 0.85rem; text-align: center; color: var(--text-muted);">Bonferroni-corrected, extracted from the VECM environment</p>
+    </div>
+  </div>
+
+  <!-- SLIDE 9: Causal Chain -->
+  <div class="slide content-center" data-slide="8">
+    <h3>Key Finding</h3>
+    <h2>A Two-Stage Pricing Cascade</h2>
+    <p style="max-width: 750px; text-align: center; margin-bottom: 36px;">
+      The evidence reveals a <span class="highlight">hybrid mechanism</span>, not a simple cost-push or demand-pull dichotomy.
+    </p>
+    <div class="causal-chain">
+      <div class="causal-node primary">Gasoline Demand</div>
+      <div class="causal-step">
+        <div class="causal-arrow">&rarr;</div>
+        <div class="causal-label">demand-pull</div>
+      </div>
+      <div class="causal-node">Crude Oil</div>
+      <div class="causal-step">
+        <div class="causal-arrow">&rarr;</div>
+        <div class="causal-label">cost-push</div>
+      </div>
+      <div class="causal-node">Heating Oil</div>
+    </div>
+    <div style="display: flex; gap: 4px; align-items: center; justify-content: center; margin: 12px 0; color: var(--text-muted);">
+      <span style="font-size: 0.85rem;">+ direct channel:</span>
+    </div>
+    <div class="causal-chain" style="margin-top: 0;">
+      <div class="causal-node primary">Gasoline</div>
+      <div class="causal-step">
+        <div class="causal-arrow">&rarr;</div>
+        <div class="causal-label">demand-pull</div>
+      </div>
+      <div class="causal-node">Heating Oil</div>
+    </div>
+    <div class="finding-box" style="margin-top: 28px; text-align: center; max-width: 750px;">
+      <p style="font-size: 1rem;">Downstream gasoline demand is the <em>ultimate price driver</em>. Crude oil acts as a transmission channel, not the originator.</p>
+    </div>
+  </div>
+
+  <!-- SLIDE 10: IRFs -->
+  <div class="slide content-center" data-slide="9">
+    <h3>Results</h3>
+    <h2>Impulse Response Functions</h2>
+    <div class="figure-container" style="max-width: 750px; width: 100%;">
+      <img src="figures/fig3_irf.png" alt="Impulse Response Functions">
+    </div>
+    <div style="display: flex; gap: 20px; max-width: 750px; margin-top: 16px;">
+      <div class="card" style="flex: 1;">
+        <p style="font-size: 0.9rem;"><span class="highlight">Crude &rarr; Products:</span> Partial pass-through (~33% gasoline, ~40% heating oil by week 5)</p>
+      </div>
+      <div class="card" style="flex: 1;">
+        <p style="font-size: 0.9rem;"><span class="highlight">Products &rarr; Crude:</span> Near-complete transmission (~100% by week 20). Products dominate.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 11: FEVD -->
+  <div class="slide content-center" data-slide="10">
+    <h3>Results</h3>
+    <h2>Forecast Error Variance Decomposition</h2>
+    <div class="figure-container figure-full">
+      <img src="figures/fig4_fevd.png" alt="FEVD">
+    </div>
+    <div style="display: flex; gap: 20px; max-width: 900px; margin-top: 20px;">
+      <div class="card" style="flex: 1; text-align: center;">
+        <p style="font-size: 1.5rem; font-weight: 700; color: var(--accent-light);">84%</p>
+        <p style="font-size: 0.85rem;">Crude variance self-explained at 24 weeks</p>
+      </div>
+      <div class="card" style="flex: 1; text-align: center;">
+        <p style="font-size: 1.5rem; font-weight: 700; color: var(--red);">71%</p>
+        <p style="font-size: 0.85rem;">Gasoline own-variance (18% from crude)</p>
+      </div>
+      <div class="card" style="flex: 1; text-align: center;">
+        <p style="font-size: 1.5rem; font-weight: 700; color: var(--green);">69%</p>
+        <p style="font-size: 0.85rem;">Heating oil own-variance, most interconnected</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 12: Diagnostics -->
+  <div class="slide content-center" data-slide="11">
+    <h3>Robustness</h3>
+    <h2>Model Diagnostics & Stability</h2>
+    <div class="two-col two-col-wide" style="max-width: 1200px;">
+      <div class="figure-container" style="padding: 16px;">
+        <img src="figures/fig6_stability.png" alt="CUSUM stability test" style="min-height: 250px;">
+      </div>
+      <div>
+        <ul>
+          <li><span class="green">CUSUM test</span> stays within 5% bounds: no structural break invalidates the model</li>
+          <li><span class="green">Ljung-Box</span> p-values all exceed 5%: no serial autocorrelation</li>
+          <li><span class="amber">ARCH effects</span> present (p &lt; 0.001), a known limitation; point estimates remain consistent</li>
+          <li>Results robust across <span class="highlight">alternative lag orders</span> and <span class="highlight">Cholesky orderings</span></li>
+        </ul>
+        <div class="card" style="margin-top: 20px;">
+          <h4 style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">Model Specification</h4>
+          <p style="font-size: 0.9rem;">Lag order: <span class="highlight">k = 5</span> (AIC) &nbsp;|&nbsp; Rank: <span class="highlight">r = 2</span> &nbsp;|&nbsp; Deterministic: restricted constant</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 13: Conclusions -->
+  <div class="slide content-center" data-slide="12">
+    <h3>Conclusions</h3>
+    <h2>Key Takeaways</h2>
+    <div class="conclusion-grid">
+      <div class="conclusion-item">
+        <h4>1. Demand-Pull Dominates</h4>
+        <p>Gasoline demand is the primary price driver, not crude oil supply shocks. Crude bears the error-correction burden.</p>
+      </div>
+      <div class="conclusion-item">
+        <h4>2. Two-Stage Cascade</h4>
+        <p>Gasoline pulls crude up (demand-pull), then crude pushes heating oil (cost-push), a hybrid, not a simple dichotomy.</p>
+      </div>
+      <div class="conclusion-item">
+        <h4>3. Asymmetric Pass-Through</h4>
+        <p>Product-to-crude transmission is near-complete (~100%), while crude-to-product pass-through is partial (~33–40%).</p>
+      </div>
+      <div class="conclusion-item">
+        <h4>4. Hedging Implications</h4>
+        <p>Heating oil positions should reference gasoline as the lead market; crude serves as a secondary cost conduit.</p>
+      </div>
+    </div>
+    <div class="finding-box" style="margin-top: 28px; text-align: center; max-width: 700px;">
+      <p style="font-size: 0.95rem; color: var(--text-muted);">
+        <strong style="color: var(--text-primary);">Limitations:</strong> ARCH effects suggest a GARCH or NARDL extension could capture volatility clustering and asymmetric adjustment.
+      </p>
+    </div>
+  </div>
+
+  <!-- SLIDE 14: Thank You -->
+  <div class="slide slide-end" data-slide="13">
+    <h1>Thank You</h1>
+    <div class="divider" style="margin: 24px auto;"></div>
+    <p style="font-size: 1.3rem; color: var(--text-secondary); margin-bottom: 12px;">Questions?</p>
+    <p style="font-size: 0.95rem; color: var(--text-muted);">
+      Econometrics of Energy Markets<br>
+      Master's coursework, January 2026
+    </p>
+  </div>
+
+</div>
+
+<!-- Navigation -->
+<div class="nav-bar">
+  <span class="progress" id="slideCounter">1 / 14</span>
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="changeSlide(-1)">&larr;</button>
+    <button class="nav-btn" onclick="changeSlide(1)">&rarr;</button>
+  </div>
+</div>
+
+<div class="key-hint">
+  <kbd>&larr;</kbd> <kbd>&rarr;</kbd> or click arrows to navigate
+</div>
+
+<script>
+  let current = 0;
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  const progressBar = document.getElementById('progressBar');
+  const counter = document.getElementById('slideCounter');
+
+  function updateSlide() {
+    slides.forEach((s, i) => {
+      s.classList.remove('active', 'exit');
+      if (i === current) s.classList.add('active');
+    });
+    progressBar.style.width = ((current + 1) / total * 100) + '%';
+    counter.textContent = (current + 1) + ' / ' + total;
+  }
+
+  function changeSlide(dir) {
+    const next = current + dir;
+    if (next < 0 || next >= total) return;
+    slides[current].classList.add('exit');
+    current = next;
+    updateSlide();
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); changeSlide(1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); changeSlide(-1); }
+    if (e.key === 'Home') { e.preventDefault(); current = 0; updateSlide(); }
+    if (e.key === 'End') { e.preventDefault(); current = total - 1; updateSlide(); }
+  });
+
+  // Touch support
+  let touchStartX = 0;
+  document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+  document.addEventListener('touchend', (e) => {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) changeSlide(diff > 0 ? 1 : -1);
+  });
+
+  updateSlide();
+</script>
+
+</body>
+</html>

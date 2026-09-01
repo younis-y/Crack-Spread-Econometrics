@@ -1,0 +1,27 @@
+# Secrets and credentials
+.env
+.env.*
+*.pem
+*.key
+credentials
+credentials.*
+credentials/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+.virtual_documents/
+
+# R
+.RData
+.Rhistory
+
+# macOS
+.DS_Store
+
+# Office lock files
+~$*

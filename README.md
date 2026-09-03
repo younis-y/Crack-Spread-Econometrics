@@ -1,10 +1,19 @@
-# Does crude cost-push refined products, or does gasoline demand-pull crude?
+# Gasoline demand pulls crude, not the other way round
 
 A vector error correction model of the 3-2-1 crack spread — WTI crude, NY Harbor
-gasoline, NY Harbor heating oil — on 1,361 weekly observations (2000-01-07 to
-2026-01-30), with a confirmatory ADF/KPSS unit root strategy, Johansen
-cointegration, Bonferroni-corrected Granger causality, and error-correction
-adjustment speeds read off the loading matrix.
+gasoline, NY Harbor heating oil — on **1,361 weekly observations** spanning
+2000-01-07 to 2026-01-30, with a confirmatory ADF/KPSS unit-root strategy,
+Johansen cointegration, Bonferroni-corrected Granger causality, and
+error-correction adjustment speeds read off the loading matrix.
+
+**The textbook reading does not survive the data.** Refining is normally
+described as cost-push: crude sets the input price and products follow. On weekly
+data the causality runs the other way — gasoline Granger-causes crude
+(F = 8.72, adjusted p < 0.001) while crude does not cause gasoline
+(F = 1.94, adjusted p = 0.61) — and crude carries the only equilibrium-restoring
+loading on the first cointegrating vector (α = −0.042, p = 0.044, half-life
+16.2 weeks). Crude is the series doing the adjusting, which is the signature of
+a demand-pull chain: gasoline → crude → heating oil.
 
 The 3-2-1 spread is the theoretical gross refining margin from cracking three
 barrels of crude into two of gasoline and one of distillate:
@@ -12,10 +21,6 @@ barrels of crude into two of gasoline and one of distillate:
 ```
 S_t = (2 * P_gasoline,t + 1 * P_heating_oil,t) - 3 * P_crude,t
 ```
-
-The textbook reading is cost-push: crude sets the input price and products
-follow. The question here is whether the weekly data support that direction, or
-the reverse.
 
 ## Findings
 
